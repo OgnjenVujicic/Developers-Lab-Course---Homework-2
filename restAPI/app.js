@@ -1,19 +1,21 @@
 const express = require('express')
-const { json, urlencoded } = require('body-parser')
-
-const connect = require("./helpers").connect;
+require('dotenv').config()
+require("./db");
 const User = require('./controllers/user');
 const Product = require('./controllers/product');
+const userRouter = require('./routes/user')
 
 const app = express()
 
-app.use(urlencoded({ extended: true }))
-app.use(json())
-
+app.use(express.json())
+app.use(userRouter)
+/*
 app.get('/users', async (req, res) => {
   const users = await User.findAll();
   res.status(200).json(users)
 })
+
+
 
 app.post('/user', async (req, res) => {
   const userToCreate = req.body.data;
@@ -24,7 +26,7 @@ app.post('/user', async (req, res) => {
     console.log(error);
     res.json(error)
   }
-})
+}) 
 
 app.post('/product', async (req, res) => {
     const productToCreate = req.body.data;
@@ -35,10 +37,8 @@ app.post('/product', async (req, res) => {
       console.log(error);
       res.json(error)
     }
-  })
+  })*/
 
-connect('mongodb://localhost:27017/database')
-  .then(() => app.listen(3000, () => {
-    console.log('server on http://localhost:3000')
-  }))
-  .catch(e => console.error(e))
+app.listen(process.env.PORT, () => {
+    console.log(`Server running on port ${process.env.PORT}`)
+  })

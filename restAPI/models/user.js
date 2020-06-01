@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const crypto = require('crypto');
+const jwt = require('jsonwebtoken')
 
 const user = new mongoose.Schema({
 username: {
@@ -13,7 +15,8 @@ password: {
     type: String,
     minlength: 5,
     maxlength: 25,
-    required: true
+    required: true,
+    match: [new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])"), 'Password must have atleast one capital letter and number']
   },
 email: {
     type: String,
@@ -35,5 +38,31 @@ products: [{
 }]
 }, {timestamps: true})
 
+user.pre('save', function(next) {
+  if ( this.password && this.isModified('password') ) {
+    this.password = crypto.createHash('sha256').update(this.password).digest('base64');
+  }
+  next();
+});
 
-module.exports = mongoose.model('user', user)
+user.methods.generateAuthToken = async function() {
+  const user = this
+  const token = jwt.sign({_id: user._id}, process.env.JWT_KEY,{ expiresIn: "1h" })
+  return token
+}
+
+user.statics.findByCredentials = async (email, password) => {
+  const check_user = await User.findOne({ email } )
+  if (!check_user) {
+      throw new Error('Invalid login credentials' )
+  }
+  const passHash = crypto.createHash('sha256').update(password).digest('base64');
+  if ( passHash != check_user.password) {
+      throw new Error('Invalid login credentials' )
+  }
+  return check_user
+}
+
+const User = mongoose.model('user', user)
+
+module.exports = User
