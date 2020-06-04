@@ -1,11 +1,38 @@
 const express = require('express')
-const User = require('../models/user')
 const auth = require('../middlewares/auth')
 const userController = require('../controllers/user');
 
 let usrCon = new userController();
 
 const router = express.Router()
+
+
+router.route('/user/:username')
+    .get(async (req, res) => {
+    var username = req.params.username;
+    try {
+        const user = await usrCon.findOne({username:username})
+        res.status(200).send(user)
+    } catch (error) {
+        res.status(400).send({error: error.message})
+    }})
+    .put(async (req, res) => {
+        var username = req.params.username;
+        try {
+            const user = await usrCon.update({username: username}, req.body)         
+            res.status(200).send(user)
+        } catch (error) {
+            res.status(400).send({error: error.message})
+    }})
+    .delete(async (req, res) => {
+        var username = req.params.username;
+        try {
+            const info = await usrCon.delete({username: username})            
+            res.status(200).send(info)
+        } catch (error) {
+            res.status(400).send({error: error.message})
+    }})
+
 
 router.post('/user', async (req, res) => {
     try {

@@ -13,10 +13,8 @@ username: {
   },
 password: {
     type: String,
-    minlength: 5,
-    maxlength: 25,
     required: true,
-    match: [new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])"), 'Password must have atleast one capital letter and number']
+    match: [new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{5,})"), 'Password must have atleast one capital letter and number and more then 4 chars']
   },
 email: {
     type: String,
@@ -38,12 +36,24 @@ products: [{
 }]
 }, {timestamps: true})
 
+
 user.pre('save', function(next) {
   if ( this.password && this.isModified('password') ) {
     this.password = crypto.createHash('sha256').update(this.password).digest('base64');
   }
   next();
 });
+
+user.pre('findOneAndUpdate', async function() {
+  const docToUpdate = await this.model.findOne(this.getQuery())
+  if (docToUpdate.password !== this._update.password) {
+    if (!this._update.password.match(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{5,})"))){
+      throw new Error('Password must have atleast one capital letter and number and more then 4 chars')
+    }
+    const newPassword = crypto.createHash('sha256').update(this._update.password).digest('base64');
+    this._update.password = newPassword
+  }
+})
 
 user.methods.generateAuthToken = async function() {
   const user = this
