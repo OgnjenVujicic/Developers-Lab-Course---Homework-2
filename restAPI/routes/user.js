@@ -8,15 +8,20 @@ const router = express.Router()
 
 
 router.route('/user/:username')
-    .get(async (req, res) => {
+    .get(auth,async (req, res) => {
     var username = req.params.username;
     try {
         const user = await usrCon.findOne({username:username})
-        res.status(200).send(user)
+        if(!user){
+            res.status(404).send({error : "not found"})
+        }
+        else{
+            res.status(200).send(user)
+        }
     } catch (error) {
         res.status(400).send({error: error.message})
     }})
-    .put(async (req, res) => {
+    .put(auth,async (req, res) => {
         var username = req.params.username;
         try {
             const user = await usrCon.update({username: username}, req.body)         
@@ -24,7 +29,7 @@ router.route('/user/:username')
         } catch (error) {
             res.status(400).send({error: error.message})
     }})
-    .delete(async (req, res) => {
+    .delete(auth,async (req, res) => {
         var username = req.params.username;
         try {
             const info = await usrCon.delete({username: username})            
@@ -56,12 +61,12 @@ router.post('/user/login', async(req, res) => {
 
 })
 
-router.get('/user/me', auth, async(req, res) => {
+router.get('/me', auth, async(req, res) => {
     // View logged in user profile
-    res.send(req.user)
+    res.status(200).send(req.user)
 })
 
-router.get('/users', async (req, res) => {
+router.get('/users', auth, async (req, res) => {
     const users = await usrCon.findAll()
     res.status(200).send(users)
   })

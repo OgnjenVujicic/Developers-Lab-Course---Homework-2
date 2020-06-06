@@ -57,7 +57,7 @@ user.pre('findOneAndUpdate', async function() {
 
 user.methods.generateAuthToken = async function() {
   const user = this
-  const token = jwt.sign({_id: user._id}, process.env.JWT_KEY,{ expiresIn: "1h" })
+  const token = jwt.sign({_id: user._id}, process.env.JWT_KEY,{ expiresIn: "5h" })
   return token
 }
 
