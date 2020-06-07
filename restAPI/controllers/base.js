@@ -12,6 +12,16 @@ class BaseController {
     
         })
     }
+    findPaginate(limit, offset) {
+        return new Promise((resolve, reject) => {
+            try {
+                resolve(this.model.find({}).limit(parseInt(limit)).skip(parseInt(offset)).exec())
+            } catch (e) {
+                reject(false)
+            }
+    
+        })
+    }
     create(colletionToCreate) {
         return new Promise((resolve, reject) => {
             try {
@@ -49,14 +59,13 @@ class BaseController {
             }
         })
     }
-    findById(id) {
+    findMany(query) {
         return new Promise((resolve, reject) => {
             try {
-                resolve(this.model.findById(id).exec())
+                resolve(this.model.find(query))
             } catch (e) {
                 reject(false)
             }
-    
         })
     }
   }

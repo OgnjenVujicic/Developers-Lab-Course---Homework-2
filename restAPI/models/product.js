@@ -45,10 +45,12 @@ product.post('save', async function() {
 
 product.pre('deleteOne', async function() {
     const docToDelete = await this.model.findOne(this.getQuery())
+    if(docToDelete){
     user = await User.findOne({ _id: docToDelete.user })
     index = user.products.indexOf(docToDelete._id);
     if (index !== -1) user.products.splice(index, 1);
     user.save()
+    }
   });
 
 
